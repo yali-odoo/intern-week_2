@@ -1,0 +1,99 @@
+code guideline notes:
+ module:
+    data/ : demo and data xml
+
+    models/ : models definition
+
+    controllers/ : contains controllers (HTTP routes)
+
+    views/ : contains the views and templates
+
+    static/ : contains the web assets, separated into css/, js/, img/, lib/, …
+    
+    wizard/ : regroups the transient models (models.TransientModel) and their views
+
+    report/ : contains the printable reports and models based on SQL views. Python objects and XML views are included in this directory
+
+    tests/ : contains the Python tests
+
+XML files:
+   1. record notation to declare a record
+   
+         <model_name>_menu_do_stuff for submenus.
+
+    For a view: <model_name>_view_<view_type>, where view_type is kanban, form, tree, search, …
+
+    For an action: the main action respects <model_name>_action. Others are suffixed with _<detail>, where detail is a lowercase string briefly explaining the action. This is used only if multiple actions are declared for the model.
+
+    For window actions: suffix the action name by the specific view information like <model_name>_action_view_<view_type>.
+
+    For a group: <module_name>_group_<group_name> where group_name is the name of the group, generally ‘user’, ‘manager’, …
+
+    For a rule: <model_name>_rule_<concerned_group> where concerned_group is the short name of the concerned group (‘user’ for the ‘model_name_group_user’, ‘public’ for public user, ‘company’ for multi-company rules, …).
+
+Name should be identical to xml id with dots replacing underscores. Actions should have a real naming as it is used as display name.
+
+python:
+ 1. imported file -> imported line are alphabetically sorted
+ 2.do not use .clone()-> use dict() list()
+ 3.update dict--> use .update(key=value,...)
+ 4 avoid to use redundant temp variabl, ex:
+          # a bit complex and with a redundant temp variable
+def axes(self, axis):
+        axes = []
+        if type(axis) == type([]):
+                axes.extend(axis)
+        else:
+                axes.append(axis)
+        return axes
+
+ # clearer
+def axes(self, axis):
+        if type(axis) == type([]):
+                return list(axis) # clone the axis
+        else:
+                return [axis] # single-element list
+---->need to know the builtins-->ttps://docs.python.org/3/library/functions.html
+# not very good
+cube = []
+for i in res:
+        cube.append((i['id'],i['name']))
+# better
+cube = [(i['id'], i['name']) for i in res]
+
+python collections
+1 are booleans 
+
+use dict.setdefault
+...# longer.. harder to read
+values = {}
+for element in iterable:
+    if element not in values:
+        values[element] = []
+    values[element].append(other_value)
+
+# better.. use dict.setdefault method
+values = {}
+for element in iterable:
+    values.setdefault(element, []).append(other_value)
+
+document the code (docstring)---->http://python.net/~goodger/projects/pycon/2007/idiomatic/handout.html
+
+
+Programming in Odoo
+
+    Avoid to create generators and decorators: only use the ones provided by the Odoo API.
+
+    As in python, use filtered, mapped, sorted, … methods to ease code reading and performance.
+
+Think extendable
+
+Functions and methods should not contain too much logic: having a lot of small and simple methods is more advisable than having few large and complex methods. A good rule of thumb is to split a method as soon as it has more than one responsibility (see http://en.wikipedia.org/wiki/Single_responsibility_principle).
+
+Hardcoding a business logic in a method should be avoided as it prevents to be easily extended by a submodule.
+ 
+ You should NEVER call cr.commit() yourself, UNLESS you have created your own database cursor explicitly! And the situations where you need to do that are exceptional!
+
+Use translation method correctly
+
+Odoo uses a GetText-like method named “underscore” _( ) to indicate that a static string used in the code needs to be translated at runtime using the language of the context. This pseudo-method is accessed within your code by importing as follows:      
